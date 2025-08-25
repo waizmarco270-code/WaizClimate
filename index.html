@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WAIZ Weather Ultimate Edition - Premium Weather Experience</title>
+    <meta name="description" content="Premium weather application with real-time radar, 13 themes, sound effects, and beautiful animations">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Leaflet for Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-dark">
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="waiz-logo">
+                <h1>WAIZ</h1>
+                <p>Weather Ultimate Edition</p>
+            </div>
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Initializing premium features...</p>
+            <div class="loading-progress">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Canvas for Animations -->
+    <canvas id="effects-canvas"></canvas>
+
+    <!-- Sound Controls -->
+    <
+
+    <!-- Main App Container -->
+    <div id="app" class="app hidden">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <div class="waiz-logo-small">
+                    <h2>WAIZ</h2>
+                    <span>Weather Ultimate</span>
+                </div>
+                <div class="season-indicator">
+                    <i id="season-icon" class="fas fa-leaf"></i>
+                    <span id="season-text">Auto Theme</span>
+                </div>
+            </div>
+            
+            <div class="header-center">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="search-input" class="search-input" placeholder="Search any city worldwide...">
+                    <button id="voice-search" class="voice-search-btn" title="Voice Search">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <div id="search-results" class="search-results hidden"></div>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <button class="icon-btn" id="radar-btn" title="Weather Radar">
+                    <i class="fas fa-satellite"></i>
+                </button>
+                <button class="icon-btn" id="favorites-btn" title="Favorites">
+                    <i class="fas fa-heart"></i>
+                </button>
+                <button class="icon-btn" id="units-toggle" title="Toggle Units">
+                    <span class="units-text">°C</span>
+                </button>
+                <button class="icon-btn" id="theme-selector" title="Change Theme">
+                    <i class="fas fa-palette"></i>
+                </button>
+                <button class="icon-btn" id="settings-btn" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Live Indicator -->
+            <div class="live-indicator">
+                <span class="live-dot"></span>
+                <span id="last-updated">Live</span>
+                <div class="fps-counter" id="fps-counter">60 FPS</div>
+            </div>
+
+            <!-- Current Weather Card -->
+            <div class="weather-main-card glass-card">
+                <div class="weather-main-content">
+                    <div class="weather-primary">
+                        <div class="temperature-display">
+                            <span id="current-temp" class="current-temp">--°</span>
+                            <div class="weather-icon">
+                                <span id="weather-emoji" class="weather-emoji">🌤️</span>
+                            </div>
+                        </div>
+                        <div class="location-info">
+                            <h1 id="current-location" class="current-location">Loading...</h1>
+                            <p id="current-condition" class="current-condition">Getting weather data</p>
+                            <p id="feels-like" class="feels-like">Feels like --°</p>
+                            <div class="weather-alerts" id="weather-alerts"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="weather-secondary">
+                        <div class="high-low">
+                            <span id="temp-high" class="temp-high">H:--°</span>
+                            <span id="temp-low" class="temp-low">L:--°</span>
+                        </div>
+                        <button class="favorite-btn" id="favorite-current" title="Add to Favorites">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Special Anime Signature for Anime Theme -->
+                <div class="waizmarco-signature-special hidden">
+                    <span>💖 WaizMarco Signature 💖</span>
+                </div>
+            </div>
+
+            <!-- Weather Details Grid -->
+            <div class="weather-details-grid">
+                <div class="weather-detail-card glass-card">
+                    <div class="detail-icon"><i class="fas fa-eye"></i></div>
+                    <div class="detail-content">
+                        <span class="detail-label">Visibility</span>
+                        <span id="visibility" class="detail-value">-- km</span>
+                    </div>
+                </div>
+                
+                <div class="weather-detail-card glass-card">
+                    <div class="detail-icon"><i class="fas fa-tint"></i></div>
+                    <div class="detail-content">
+                        <span class="detail-label">Humidity</span>
+                        <span id="humidity" class="detail-value">--%</span>
+                    </div>
+                </div>
+                
+                <div class="weather-detail-card glass-card">
+                    <div class="detail-icon"><i class="fas fa-wind"></i></div>
+                    <div class="detail-content">
+                        <span class="detail-label">Wind</span>
+                        <span id="wind-speed" class="detail-value">-- km/h</span>
+                    </div>
+                </div>
+                
+                <div class="weather-detail-card glass-card">
+                    <div class="detail-icon"><i class="fas fa-thermometer-half"></i></div>
+                    <div class="detail-content">
+                        <span class="detail-label">Pressure</span>
+                        <span id="pressure" class="detail-value">-- hPa</span>
+                    </div>
+                </div>
+                
+                <div class="weather-detail-card glass-card">
+                    <div class="detail-icon"><i class="fas fa-sun"></i></div>
+                    <div class="detail-content">
+                        <span class="detail-label">UV Index</span>
+                        <span id="uv-index" class="detail-value">--</span>
+                    </div>
+                </div>
+                
+                <div class="weather-detail-card glass-card">
+                    <div class="detail-icon"><i class="fas fa-smog"></i></div>
+                    <div class="detail-content">
+                        <span class="detail-label">Air Quality</span>
+                        <span id="air-quality" class="detail-value">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weather Radar Section -->
+            <div class="radar-section">
+                <h3 class="section-title">
+                    <i class="fas fa-satellite"></i>
+                    Live Weather Radar
+                </h3>
+                <div class="radar-container glass-card">
+                    <div class="radar-controls">
+                        <button id="radar-play" class="radar-control-btn">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <input type="range" id="radar-time" class="radar-time-slider" min="0" max="7" value="7" step="1">
+                        <select id="radar-layer" class="radar-layer-select">
+                            <option value="precipitation_new">Precipitation</option>
+                            <option value="clouds_new">Clouds</option>
+                            <option value="pressure_new">Pressure</option>
+                            <option value="wind_new">Wind</option>
+                            <option value="temp_new">Temperature</option>
+                        </select>
+                    </div>
+                    <div id="radar-map" class="radar-map"></div>
+                </div>
+            </div>
+
+            <!-- Hourly Forecast -->
+            <div class="forecast-section">
+                <h3 class="section-title">48-Hour Forecast</h3>
+                <div id="hourly-forecast" class="hourly-forecast">
+                    <!-- Hourly forecast items will be populated here -->
+                </div>
+            </div>
+
+            <!-- Daily Forecast -->
+            <div class="forecast-section">
+                <h3 class="section-title">7-Day Forecast</h3>
+                <div id="daily-forecast" class="daily-forecast">
+                    <!-- Daily forecast items will be populated here -->
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="waizmarco-signature">
+                    <span>Made with 💖 by WaizMarco</span>
+                </div>
+                <div class="footer-links">
+                    <button class="footer-link" id="about-btn">About</button>
+                    <button class="footer-link" id="privacy-btn">Privacy</button>
+                    <button class="footer-link" id="share-btn">Share</button>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Theme Selector Modal -->
+    <div id="theme-modal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content theme-modal">
+            <div class="modal-header">
+                <h3>Choose Premium Theme</h3>
+                <button class="close-modal" id="close-theme-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="theme-grid">
+                <div class="theme-option" data-theme="dark">
+                    <div class="theme-preview theme-preview-dark"></div>
+                    <span>Dark Matrix</span>
+                </div>
+                <div class="theme-option" data-theme="light">
+                    <div class="theme-preview theme-preview-light"></div>
+                    <span>Light Mode</span>
+                </div>
+                <div class="theme-option" data-theme="neon">
+                    <div class="theme-preview theme-preview-neon"></div>
+                    <span>Neon Cyber</span>
+                </div>
+                <div class="theme-option" data-theme="xenon">
+                    <div class="theme-preview theme-preview-xenon"></div>
+                    <span>Xenon Storm</span>
+                </div>
+                <div class="theme-option" data-theme="cherry">
+                    <div class="theme-preview theme-preview-cherry"></div>
+                    <span>Cherry Blossom</span>
+                </div>
+                <div class="theme-option" data-theme="space">
+                    <div class="theme-preview theme-preview-space"></div>
+                    <span>Deep Space</span>
+                </div>
+                <div class="theme-option" data-theme="aurora">
+                    <div class="theme-preview theme-preview-aurora"></div>
+                    <span>Aurora Borealis</span>
+                </div>
+                <div class="theme-option" data-theme="pixel">
+                    <div class="theme-preview theme-preview-pixel"></div>
+                    <span>Retro Pixel</span>
+                </div>
+                <div class="theme-option" data-theme="galaxy">
+                    <div class="theme-preview theme-preview-galaxy"></div>
+                    <span>Galaxy Nebula</span>
+                </div>
+                <div class="theme-option" data-theme="rainy">
+                    <div class="theme-preview theme-preview-rainy"></div>
+                    <span>Rainy Glass</span>
+                </div>
+                <div class="theme-option" data-theme="fireice">
+                    <div class="theme-preview theme-preview-fireice"></div>
+                    <span>Fire & Ice</span>
+                </div>
+                <div class="theme-option" data-theme="anime">
+                    <div class="theme-preview theme-preview-anime"></div>
+                    <span>Anime City 💖</span>
+                </div>
+                <div class="theme-option" data-theme="zen">
+                    <div class="theme-preview theme-preview-zen"></div>
+                    <span>Minimal Zen</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Favorites Modal -->
+    <div id="favorites-modal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Favorite Cities</h3>
+                <button class="close-modal" id="close-favorites-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="favorites-list" class="favorites-list">
+                <!-- Favorite cities will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Settings</h3>
+                <button class="close-modal" id="close-settings-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="settings-content">
+                <div class="setting-item">
+                    <label for="animations-toggle" class="setting-label">
+                        <span>Enable Animations (60-90 FPS)</span>
+                        <input type="checkbox" id="animations-toggle" class="setting-toggle" checked>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label for="auto-refresh-toggle" class="setting-label">
+                        <span>Auto Refresh (5min)</span>
+                        <input type="checkbox" id="auto-refresh-toggle" class="setting-toggle" checked>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label for="geolocation-toggle" class="setting-label">
+                        <span>Use Current Location</span>
+                        <input type="checkbox" id="geolocation-toggle" class="setting-toggle">
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label for="seasonal-theme-toggle" class="setting-label">
+                        <span>Seasonal Auto Themes</span>
+                        <input type="checkbox" id="seasonal-theme-toggle" class="setting-toggle" checked>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label for="sound-effects-toggle" class="setting-label">
+                        <span>Background Sound Effects</span>
+                        <input type="checkbox" id="sound-effects-toggle" class="setting-toggle" checked>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label for="radar-auto-play" class="setting-label">
+                        <span>Auto Play Radar</span>
+                        <input type="checkbox" id="radar-auto-play" class="setting-toggle">
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Radar Modal -->
+    <div id="radar-modal" class="modal radar-modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content radar-modal-content">
+            <div class="modal-header">
+                <h3>Weather Radar - Live View</h3>
+                <button class="close-modal" id="close-radar-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="radar-full-container">
+                <div class="radar-controls-full">
+                    <button id="radar-play-full" class="radar-control-btn">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <input type="range" id="radar-time-full" class="radar-time-slider" min="0" max="7" value="7" step="1">
+                    <span id="radar-time-label">Now</span>
+                    <select id="radar-layer-full" class="radar-layer-select">
+                        <option value="precipitation_new">Precipitation</option>
+                        <option value="clouds_new">Clouds</option>
+                        <option value="pressure_new">Pressure</option>
+                        <option value="wind_new">Wind</option>
+                        <option value="temp_new">Temperature</option>
+                    </select>
+                </div>
+                <div id="radar-map-full" class="radar-map-full"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Toast -->
+    <div id="error-toast" class="toast error-toast hidden">
+        <i class="fas fa-exclamation-circle"></i>
+        <span id="error-message">An error occurred</span>
+        <button class="close-toast" id="close-error-toast">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- Success Toast -->
+    <div id="success-toast" class="toast success-toast hidden">
+        <i class="fas fa-check-circle"></i>
+        <span id="success-message">Success</span>
+        <button class="close-toast" id="close-success-toast">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- Weather Alert Toast -->
+    <div id="alert-toast" class="toast alert-toast hidden">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span id="alert-message">Weather Alert</span>
+        <button class="close-toast" id="close-alert-toast">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
